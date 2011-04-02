@@ -1,6 +1,6 @@
 !#/usr/bin/env ruby
 
-# original script courtesy of Krzysztof Wilczynski 
+# extended from http://snippets.dzone.com/tag/netstat courtesy of Krzysztof Wilczynski 
 # https://github.com/kwilczynski
 
 
