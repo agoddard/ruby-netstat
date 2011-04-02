@@ -6,19 +6,20 @@
 
 require 'optparse'
 options = {}
+
+protocols = ["tcp","udp"]
 OptionParser.new do |opts|
   opts.banner = "Usage: netstat.rb [options]"
   
-  ["udp","tcp"].each do |protocol|
+  protocols.each do |protocol|
     @protocol = []
     opts.on( "-#{protocol[0,1]}", '--'+ protocol, "show #{protocol} ports" ) do |option|
       @protocol << protocol if option
-      puts protocol
     end
   end
-
 end.parse!
 
+@protocol = protocols if @protocol.empty?
 
 PROC_NET = []
 @protocol.each do |protocol|
