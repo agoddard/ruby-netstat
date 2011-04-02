@@ -4,7 +4,26 @@
 # https://github.com/kwilczynski
 
 
-PROC_NET = ['/proc/net/tcp','/proc/net/udp']  # This should always be the same ...
+require 'optparse'
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: netstat.rb [options]"
+  
+  ["udp","tcp"].each do |protocol|
+    @protocol = []
+    opts.on( "-#{protocol[0,1]}", '--'+ protocol, "show #{protocol} ports" ) do |option|
+      @protocol << protocol if option
+      puts protocol
+    end
+  end
+
+end.parse!
+
+
+PROC_NET = []
+@protocol.each do |protocol|
+  PROC_NET << '/proc/net/' + protocol  # This should always be the same ...
+end
 
 TCP_STATES = {
   '00' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
