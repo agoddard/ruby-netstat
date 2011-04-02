@@ -17,14 +17,15 @@ OptionParser.new do |opts|
       @protocol << protocol if option
     end
   end
+  options[:verbose] = false
+  opts.on( '-v', '--verbose', 'verbose output' ) do
+    options[:verbose] = true
+  end
 end.parse!
 
 @protocol = protocols if @protocol.empty?
 
-PROC_NET = []
-@protocol.each do |protocol|
-  PROC_NET << '/proc/net/' + protocol  # This should always be the same ...
-end
+
 
 TCP_STATES = {
   '00' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
@@ -46,8 +47,13 @@ SINGLE_ENTRY_PATTERN = Regexp.new(
   /^\s*\d+:\s+(.{8}):(.{4})\s+(.{8}):(.{4})\s+(.{2})/
 )
 
-PROC_NET.each do |protocol|
-  File.open(protocol).each do |i|
+
+
+@protocol.each do |protocol|
+  if options[:verbose]
+    puts "#{protocol} :"
+  end
+  File.open('/proc/net/' + protocol).each do |i|
     i = i.strip
     if match = i.match(SINGLE_ENTRY_PATTERN)
 
@@ -64,10 +70,13 @@ PROC_NET.each do |protocol|
       connection_state = match[5]
       connection_state = TCP_STATES[connection_state]
 
-      puts "#{local_IP}:#{local_port} " +
-           "#{remote_IP}:#{remote_port} #{connection_state}"
-     end
+      if options[:verbose]
+        puts "#{local_IP}:#{local_port} " +
+         "#{remote_IP}:#{remote_port} #{connection_state}"
+      else
+         puts "#{local_IP}:#{local_port}"
+      end
+    end
   end
 end
-
 exit(0)
