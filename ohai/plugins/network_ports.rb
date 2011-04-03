@@ -58,7 +58,7 @@ single_entry_pattern = Regexp.new(
       remote_port = match[4].to_i(16)
       connection_state = match[5]
       connection_state = tcp_states[connection_state]
-      @listening[protocol.to_sym] << local_port
+      @listening[protocol.to_sym] << {local_IP => local_port}
 
     end
   end
@@ -70,7 +70,7 @@ provides 'network/ports'
 ports = Mash.new
 
 @protocols.each do |protocol|
-  ports[protocol.to_sym] = Array.new
+  ports[protocol.to_sym] = []
   @listening[protocol.to_sym].each do |port|
     ports[protocol.to_sym] << port
   end
@@ -78,4 +78,3 @@ end
 
 network[:ports] = Mash.new
 network[:ports] = ports
-# network[:ports][:test] = @listening.inspect
