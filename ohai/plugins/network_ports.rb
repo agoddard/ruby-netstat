@@ -21,7 +21,7 @@
 #
 
 
-@protocol = ["tcp","udp"]
+@protocols = ["tcp","udp"]
 
 tcp_states = {
   '00' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
@@ -45,27 +45,20 @@ single_entry_pattern = Regexp.new(
 
 
 @listening = {}
-@protocol.each do |protocol|
-   @listening[protocol.to_sym] = {}
+@protocols.each do |protocol|
+   @listening[protocol.to_sym] = []
   File.open('/proc/net/' + protocol).each do |i|
     i = i.strip
     if match = i.match(single_entry_pattern)
-
       local_IP = match[1].to_i(16)
       local_IP = [local_IP].pack("N").unpack("C4").reverse.join('.')
-
       local_port = match[2].to_i(16)
-
       remote_IP = match[3].to_i(16)
       remote_IP = [remote_IP].pack("N").unpack("C4").reverse.join('.')
-
       remote_port = match[4].to_i(16)
-
       connection_state = match[5]
       connection_state = tcp_states[connection_state]
-
-
-      @listening[protocol.to_sym][local_port] = local_port
+      @listening[protocol.to_sym] << local_port
 
     end
   end
@@ -76,12 +69,13 @@ provides 'network/ports'
 
 ports = Mash.new
 
-["tcp", "udp"].each do |protocol|
-  ports[protocol.to_sym] = Mash.new
+@protocols.each do |protocol|
+  ports[protocol.to_sym] = Array.new
   @listening[protocol.to_sym].each do |port|
-    ports[protocol.to_sym][port] = true
+    ports[protocol.to_sym] << port
   end
 end
 
 network[:ports] = Mash.new
 network[:ports] = ports
+# network[:ports][:test] = @listening.inspect
