@@ -10,22 +10,25 @@ options = {}
 protocols = ["tcp","udp"]
 OptionParser.new do |opts|
   opts.banner = "Usage: netstat.rb [options]"
+  
+  @protocol = []
   protocols.each do |protocol|
-    @protocol = []
     opts.on( "-#{protocol[0,1]}", '--'+ protocol, "show #{protocol} ports" ) do |option|
       @protocol << protocol if option
     end
-    @protocol = protocols if @protocol.empty?
   end
   options[:verbose] = false
   opts.on( '-v', '--verbose', 'verbose output' ) do
     options[:verbose] = true
   end
+  options[:listen] = false
+  opts.on( '-l', '--listen', 'only show ports which are listening' ) do
+    options[:listen] = true
+  end
 end.parse!
 
-
-
-
+# if a protocol isn't specified, we just do both
+@protocol = protocols if @protocol.empty?
 
 tcp_states = {
   '00' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
@@ -73,6 +76,10 @@ single_entry_pattern = Regexp.new(
       if options[:verbose]
         puts "#{local_IP}:#{local_port} " +
          "#{remote_IP}:#{remote_port} #{connection_state}"
+      elsif options[:listen]
+        if connection_state == "LISTEN"
+          puts "#{local_IP}:#{local_port}"
+        end 
       else
         puts "#{local_IP}:#{local_port}"
       end
