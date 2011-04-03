@@ -10,7 +10,6 @@ options = {}
 protocols = ["tcp","udp"]
 OptionParser.new do |opts|
   opts.banner = "Usage: netstat.rb [options]"
-  
   protocols.each do |protocol|
     @protocol = []
     opts.on( "-#{protocol[0,1]}", '--'+ protocol, "show #{protocol} ports" ) do |option|
@@ -28,7 +27,7 @@ end.parse!
 
 
 
-TCP_STATES = {
+tcp_states = {
   '00' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
   'FF' => 'UNKNOWN',  # Bad state ... Impossible to achieve ...
   '01' => 'ESTABLISHED',
@@ -44,7 +43,7 @@ TCP_STATES = {
   '0B' => 'CLOSING'
 }
 
-SINGLE_ENTRY_PATTERN = Regexp.new(
+single_entry_pattern = Regexp.new(
   /^\s*\d+:\s+(.{8}):(.{4})\s+(.{8}):(.{4})\s+(.{2})/
 )
 
@@ -56,7 +55,7 @@ SINGLE_ENTRY_PATTERN = Regexp.new(
   end
   File.open('/proc/net/' + protocol).each do |i|
     i = i.strip
-    if match = i.match(SINGLE_ENTRY_PATTERN)
+    if match = i.match(single_entry_pattern)
 
       local_IP = match[1].to_i(16)
       local_IP = [local_IP].pack("N").unpack("C4").reverse.join('.')
@@ -69,13 +68,13 @@ SINGLE_ENTRY_PATTERN = Regexp.new(
       remote_port = match[4].to_i(16)
 
       connection_state = match[5]
-      connection_state = TCP_STATES[connection_state]
+      connection_state = tcp_states[connection_state]
 
       if options[:verbose]
         puts "#{local_IP}:#{local_port} " +
          "#{remote_IP}:#{remote_port} #{connection_state}"
       else
-         puts "#{local_IP}:#{local_port}"
+        puts "#{local_IP}:#{local_port}"
       end
     end
   end
