@@ -16,6 +16,7 @@ OptionParser.new do |opts|
     opts.on( "-#{protocol[0,1]}", '--'+ protocol, "show #{protocol} ports" ) do |option|
       @protocol << protocol if option
     end
+    @protocol = protocols if @protocol.empty?
   end
   options[:verbose] = false
   opts.on( '-v', '--verbose', 'verbose output' ) do
@@ -23,7 +24,7 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-@protocol = protocols if @protocol.empty?
+
 
 
 
@@ -51,7 +52,7 @@ SINGLE_ENTRY_PATTERN = Regexp.new(
 
 @protocol.each do |protocol|
   if options[:verbose]
-    puts "#{protocol} :"
+    puts "#{protocol}:\n"
   end
   File.open('/proc/net/' + protocol).each do |i|
     i = i.strip
